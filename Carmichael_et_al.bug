@@ -1,0 +1,36 @@
+model
+{
+  Cl <- theta[3]*exp(eta3)
+  Vd <- (theta[2]+(theta[6]*MTX))*exp(eta2)
+  ka <- theta[1]*exp(eta1)
+  f_oral <- theta[4]
+  t_lag <- theta[5]
+  
+  k <- Cl/Vd
+  
+  eta1~dnorm(0, 1/pow(omega[1],2)) # dnorm in JAGS and BUGS uses precision not SD
+  eta2~dnorm(0, 1/pow(omega[2],2))
+  eta3~dnorm(0, 1/pow(omega[3],2))
+  
+  for(t in 1:length(times)){
+    
+    for(i in 1:length(amt)) {
+      
+      a[t, i] <- ifelse((times[t]-dosing_time[i]) < t_lag, 0, f_oral*amt[i]*0.775*ka/(Vd*(ka-k))*(exp(-k*(times[t]-dosing_time[i]-t_lag))-exp(-ka*(times[t]-dosing_time[i]-t_lag))))
+      
+    }
+    
+    mu[t] <- sum(a[t,]) *1000
+    
+
+  }
+    for(z in 1: length(tdm_times)){
+   
+    res_var[z] <- pow(mu[tdm_times[z]],2) * pow(sigma[1],2) + pow(sigma[2],2)
+    tau[z] <- 1/res_var[z]
+    
+    # likelihood of the data, given the provided error model
+    c[z]~dnorm(mu[tdm_times[z]], tau[z]) 
+  }
+  
+}

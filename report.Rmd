@@ -1,0 +1,174 @@
+---
+header-includes:
+    - \usepackage{fancyhdr}
+    - \fancyfoot[CO,CE]{OSC-Group - http://www.osc-lab.de - JMU Wuerzburg - Pharmazie}
+    - \fancyfoot[LE,RO]{\thepage}
+    - \usepackage{fontspec}
+    - \setmainfont{OpenSans}
+    - \usepackage{lscape}
+    - \newcommand{\blandscape}{\begin{landscape}}
+    - \newcommand{\elandscape}{\end{landscape}}
+    
+title: "TDM Report - Hydroxychloroquine"
+output: 
+  pdf_document:
+    latexengine: xelatex
+df_print: paged
+date: "`r format(Sys.time(), '%d.%B %Y')`"
+
+
+---
+\setmainfont{OpenSans}
+\addtolength{\headheight}{1.0cm} 
+\pagestyle{fancyplain} 
+\rhead{\includegraphics[height=1.2cm]{./logo_rechts.png}} 
+\lhead{\includegraphics[height=1.2cm]{./logo_links.png}}
+\renewcommand{\headrulewidth}{0pt}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Patient characteristics at baseline**
+
+  
+Patient ID: **`r input$pat_ID`** 
+  
+Body weight: **`r input$WT`** kg 
+
+Creatinine Clearance: **`r input$CRCL`** mL/min
+
+Receives MTX: **`r if(input$has_MTX) {"Yes"}else{"No"}`**
+
+  
+    
+``` {r ind_pars, echo=FALSE}
+
+
+```
+
+
+
+# **Clinical Recommendation**
+
+**`r names(GLOB_RECOMMENDATIONS[as.numeric(input$choose_recommendation)])`**  
+ 
+`r input$report_comment`
+
+`r if(input$additional_tdm){
+"Additional TDM sample should be obtained (see Graphic for further information)"
+} ` 
+
+
+\newpage
+
+## **Recommended Dosing strategy**
+
+
+`r if(app_data$forecast_advanced){
+tmp <- app_data$user_forecast_data_set
+
+colnames(tmp) <- c('Date', 'Time', 'Dose [mg]')
+kable(tmp, format = "latex")  %>%
+    kable_styling(position = "left")
+} else {
+
+tmp <- data.frame('Interdose Interval [h]'=input$adapt.ii,
+                 'Dose [mg]'=input$adapt.dose)
+colnames(tmp) <- c('Interdose Interval [h]', 'Dose [mg]')              
+kable(tmp, format = "latex")  %>%
+    kable_styling(position = "left")
+} ` 
+
+
+
+\newpage
+
+\blandscape
+
+## **Forecast for the next `r input$adapt.n` doses:**
+
+``` {r recomm, echo=FALSE, warning=FALSE, fig.height = 7, fig.width = 12, fig.align = "center"}
+
+  app_data$adapted_pk_plot_withTDM
+
+```
+
+\elandscape
+
+\newpage
+
+# **Dataset used**
+
+
+``` {r tdm, echo=FALSE, warning=FALSE}
+
+kable(app_data$user_data_set, format = "latex")  %>%
+    kable_styling(position = "left")
+
+```
+
+
+\newpage
+\blandscape
+
+# **Simulated Plasmaconcentration from Dataset**
+
+
+```{r simulation, echo=FALSE, warning=FALSE, fig.height = 7, fig.width = 12, fig.align = "center"}
+if(app_data$tdm_samples_available){
+  app_data$pk_plots[[1]]
+} else {
+  app_data$pk_plots[[2]]
+}
+
+```
+
+\elandscape
+
+\newpage
+
+# **MCMC Diagnostic Plots (1/2) - Results of Gibbs-Sampling and prior vs posterior distribution**
+
+```{r mcmc_diag, echo=FALSE, warning=FALSE}
+if(app_data$tdm_samples_available){
+gridExtra::grid.arrange(app_data$mcmc_result[[1]]$p_iter_ETA1, app_data$mcmc_result[[1]]$p_dens_ETA1,    
+                              app_data$mcmc_result[[1]]$p_iter_ETA2, app_data$mcmc_result[[1]]$p_dens_ETA2, 
+                              app_data$mcmc_result[[1]]$p_iter_ETA3, app_data$mcmc_result[[1]]$p_dens_ETA3, nrow=3, ncol=2, widths=c(3,1))  
+}
+
+```
+
+\newpage
+
+# **MCMC Diagnostic Plots (2/2) - distribution and correlation of random effects**
+
+```{r mcmc_diag_2, echo=FALSE, warning=FALSE}
+if(app_data$tdm_samples_available){
+chart.Correlation(app_data$mcmc_result[[1]]$chain_data, histogram=TRUE)
+}
+
+```
+
+\newpage
+
+# **MC Diagnostic Plots - distribution and correlation of random effects**
+
+
+```{r mc_diag, echo=FALSE, warning=FALSE}
+    chart.Correlation(app_data$mc_result[[3]], histogram=TRUE)
+```
+
+
+\newpage
+
+\blandscape
+
+# **Simulated PK Parameter distributions** at baseline
+
+```{r par_dist, echo=FALSE, warning=FALSE, fig.height = 7, fig.width = 16, fig.align = "center"}
+    grid.arrange(app_data$dist_plots[[1]],app_data$dist_plots[[2]],app_data$dist_plots[[3]], nrow=1, ncol=3)
+```
+
+\elandscape

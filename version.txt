@@ -1,0 +1,4 @@
+Version 0.0.1 Alpha - 23.03.2020
+=================================================
+
+Implementation of popPK Model and MCMC using JAGS
