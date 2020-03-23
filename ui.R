@@ -33,7 +33,7 @@ shinyUI(navbarPage("HQSim - by Oliver Scherf-Clavel (c) 2020 - JMU Wuerzburg", i
                                                          numericInput("ADD_AMT", "Dose (Hydroxychloroquine Sulfate) [mg]:", min = 0, max = 5000, value = 200)
                                         ),
                                         conditionalPanel(condition="input.SELECT_TYPE==2",
-                                                         numericInput("ADD_TDM", "Measured Hydroxychloroquine Concentration [mg/L]:", min = 0, max = 2000, value = 0)
+                                                         numericInput("ADD_TDM", "Measured Hydroxychloroquine Concentration [µg/L]:", min = 0, max = 2000, value = 0)
                                         ),
                                         conditionalPanel(condition="input.SELECT_TYPE==3",
                                                          numericInput("ADD_CLCR", "Creatinine Clearance [mL/min]:", min = 0, max = 180, value = 100)
@@ -198,7 +198,7 @@ shinyUI(navbarPage("HQSim - by Oliver Scherf-Clavel (c) 2020 - JMU Wuerzburg", i
                              numericInput(inputId="low.target",  label="Lower Limit Cthrough [µg/L]", value =500),
                              numericInput(inputId="high.target", label="Upper Limit Cthrough [µg/L]", value =750),
                              numericInput(inputId="sigma.1", label="Proportional Error [%]", value =20.9),
-                             numericInput(inputId="sigma.2", label="Additive Errog [mg/L]", value =19.1)
+                             numericInput(inputId="sigma.2", label="Additive Errog [µg/L]", value =19.1)
                     ),
                     tabPanel("About", htmlOutput("info.about"),hr(),
                                                      img(src="daGama_logo.png", height = 90, width = 300),
